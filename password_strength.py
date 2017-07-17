@@ -6,7 +6,7 @@ def get_password_strength(password, blacklist_path=None):
     points = 1
 
     lenght_coef = 5
-    unique_letters_quantity_coef = 2
+    unique_symbols_quantity_coef = 2
     minimal_lenght = 3
 
     min_point = 1
@@ -14,14 +14,12 @@ def get_password_strength(password, blacklist_path=None):
 
     if len(password) > minimal_lenght:
         points += len(password) // lenght_coef
-        points += check_for_standard_recommendations(password)
-        points += count_unique_letters(password) // unique_letters_quantity_coef
-        points -= check_for_duplicate_letters(password)
-        try:
-            blacklist = get_blacklist(blacklist_path)
-            points -= check_by_blacklist(password, blacklist)
-        except:
-            pass
+        points += check_for_symbols_diversity(password)
+        points += count_unique_symbols(password) // unique_symbols_quantity_coef
+        points -= check_for_duplicate_symbols(password)
+
+        blacklist = get_blacklist(blacklist_path)
+        points -= check_by_blacklist(password, blacklist)
 
     if points < min_point:
         points = min_point
@@ -31,19 +29,19 @@ def get_password_strength(password, blacklist_path=None):
     return points
 
 
-def check_for_duplicate_letters(password):
+def check_for_duplicate_symbols(password):
     if re.search(r'(.)\1{1,}', password):
         return 2
     else:
         return 0
 
 
-def count_unique_letters(password):
-    unique_letters = set(password)
-    return len(unique_letters)
+def count_unique_symbols(password):
+    password_as_set = set(password)
+    return len(password_as_set)
 
 
-def check_for_standard_recommendations(password):
+def check_for_symbols_diversity(password):
     points = 0
     password_as_set = set(password)
     control_list = [string.ascii_lowercase, string.ascii_uppercase,
@@ -55,9 +53,11 @@ def check_for_standard_recommendations(password):
 
 
 def get_blacklist(blacklist_path):
-    with open(blacklist_path, "r") as blacklist_file:
-        return blacklist_file.readlines()
-
+    try:
+        with open(blacklist_path, "r") as blacklist_file:
+            return blacklist_file.readlines()
+    except FileNotFoundError:
+        return []
 
 def check_by_blacklist(password, blacklist):
     for word in blacklist:
