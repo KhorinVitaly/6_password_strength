@@ -59,6 +59,7 @@ def get_blacklist(blacklist_path):
     except FileNotFoundError:
         return []
 
+    
 def check_by_blacklist(password, blacklist):
     for word in blacklist:
         if password in word:
